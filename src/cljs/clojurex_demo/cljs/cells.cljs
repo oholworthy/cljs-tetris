@@ -16,6 +16,3 @@
   (doseq [cell cells]
     (color-cell! $canvas cell color)))
 
-(defn render-cells! [$canvas]
-  (def $test-canvas $canvas))
-

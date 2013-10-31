@@ -2,7 +2,7 @@
   (:require [dommy.core :as d]
             [clojurex-demo.cljs.board :as b]
             [clojurex-demo.cljs.grid :refer [render-grid!]]
-            [clojurex-demo.cljs.cells :refer [render-cells!]])
+            [clojurex-demo.cljs.tetraminos :refer [render-tetraminos!]])
   (:require-macros [dommy.macros :refer [node sel1]]))
 
 (defn canvas-node []
@@ -18,4 +18,4 @@
                                                             [:div.col-md-6
                                                              (doto (canvas-node)
                                                                (render-grid!)
-                                                               (render-cells!))]])))))
+                                                               (render-tetraminos!))]])))))
