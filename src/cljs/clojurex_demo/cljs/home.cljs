@@ -1,6 +1,7 @@
 (ns clojurex-demo.cljs.home
   (:require [dommy.core :as d]
-            [clojurex-demo.cljs.board :as b])
+            [clojurex-demo.cljs.board :as b]
+            [clojurex-demo.cljs.grid :refer [render-grid!]])
   (:require-macros [dommy.macros :refer [node sel1]]))
 
 (defn canvas-node []
@@ -14,4 +15,5 @@
              (fn [_ _ _ hash]
                (d/replace-contents! (sel1 :#content) (node [:div.row {:style {:margin-top "2em"}}
                                                             [:div.col-md-6
-                                                             (canvas-node)]])))))
+                                                             (doto (canvas-node)
+                                                               (render-grid!))]])))))
