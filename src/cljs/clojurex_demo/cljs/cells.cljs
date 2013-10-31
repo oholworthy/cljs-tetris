@@ -12,13 +12,10 @@
                (- b/block-size 2)
                (- b/block-size 2))))
 
+(defn color-cells! [$canvas cells color]
+  (doseq [cell cells]
+    (color-cell! $canvas cell color)))
+
 (defn render-cells! [$canvas]
   (def $test-canvas $canvas))
-
-(comment
-  (let [$canvas $test-canvas
-        color "red"]
-
-    (doseq [[x y] [[4 4] [4 5] [4 6]]]
-      (color-cell! $canvas [x y] color))))
 
