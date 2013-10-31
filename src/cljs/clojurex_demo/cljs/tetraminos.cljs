@@ -64,9 +64,6 @@
 (defn render-tetramino! [$canvas {:keys [shape location rotation color] :as piece}]
   (c/color-cells! $canvas (piece->cells piece) color))
 
-(defn render-tetraminos! [$canvas]
-  (def $test-canvas $canvas))
-
 (comment
   (let [$canvas $test-canvas
         {:keys [blocks-wide blocks-tall]} b/canvas-size]
