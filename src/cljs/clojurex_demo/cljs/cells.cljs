@@ -15,7 +15,8 @@
       (let [context (.getContext $canvas "2d")]
         (set! (.-fillStyle context) color)
         (.fillRect context
-                   (* x b/block-size)
-                   (* y b/block-size)
-                   b/block-size
-                   b/block-size)))))
+                   (inc (* x b/block-size))
+                   (inc (* y b/block-size))
+                   (- b/block-size 2)
+                   (- b/block-size 2))))))
+
