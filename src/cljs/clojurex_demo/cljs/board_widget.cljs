@@ -3,14 +3,17 @@
             [clojurex-demo.cljs.board :as b]
             [clojurex-demo.cljs.cells :as c]
             [clojurex-demo.cljs.grid :refer [render-grid!]]
-            [clojurex-demo.cljs.tetraminos :as t])
-  (:require-macros [dommy.macros :refer [node sel1]]))
+            [clojurex-demo.cljs.tetraminos :as t]
+            [cljs.core.async :as a])
+  (:require-macros [dommy.macros :refer [node sel1]]
+                   [cljs.core.async.macros :refer [go go-loop]]))
 
 (defn canvas-node []
   (node
    (let [{:keys [blocks-tall blocks-wide]} b/canvas-size]
      [:canvas {:height (* b/block-size blocks-tall)
-               :width (* b/block-size blocks-wide)}])))
+               :width (* b/block-size blocks-wide)
+               :tabindex 0}])))
 
 (defn render-current-piece! [$canvas {old-piece :current-piece} {new-piece :current-piece}]
   (when (not= old-piece new-piece)
@@ -24,12 +27,17 @@
             (fn [_ _ old-game new-game]
               (render-current-piece! $canvas old-game new-game))))
 
-(defn make-board-widget [!game]
-  (def !test-game !game)
+(defn listen-for-keypresses! [$canvas command-ch]
+  )
 
+(defn make-board-widget [!game command-ch]
+  (def !test-game !game)
+  (def test-command-ch command-ch)
+  
   (doto (canvas-node)
     (render-grid!)
-    (watch-game! !game)))
+    (watch-game! !game)
+    (listen-for-keypresses! command-ch)))
 
 (comment
   (reset! !test-game
