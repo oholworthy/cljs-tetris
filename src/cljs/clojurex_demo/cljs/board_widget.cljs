@@ -23,10 +23,19 @@
     (when new-piece
       (t/render-tetramino! $canvas new-piece))))
 
+(defn render-placed-cells! [$canvas {old-cells :placed-cells} {new-cells :placed-cells}]
+  (when (not= old-cells new-cells)
+    (when old-cells
+      (c/color-cells! $canvas (map :cell old-cells) "white"))
+    (when new-cells
+      (doseq [{:keys [cell color]} new-cells]
+        (c/color-cell! $canvas cell color)))))
+
 (defn watch-game! [$canvas !game]
   (add-watch !game ::renderer
             (fn [_ _ old-game new-game]
-              (render-current-piece! $canvas old-game new-game))))
+              (render-current-piece! $canvas old-game new-game)
+              (render-placed-cells! $canvas old-game new-game))))
 
 (def keycode->command
   {kc/SPACE :piece-down
