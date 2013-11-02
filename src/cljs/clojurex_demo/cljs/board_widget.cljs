@@ -31,11 +31,19 @@
       (doseq [{:keys [cell color]} new-cells]
         (c/color-cell! $canvas cell color)))))
 
+(defn render-cleared-rows! [$canvas {:keys [cleared-rows]}]
+  (let [{:keys [blocks-wide]} b/canvas-size]
+    (when (seq cleared-rows)
+      (doseq [y cleared-rows
+              x (range blocks-wide)]
+        (c/color-cell! $canvas [x y] "#ccc")))))
+
 (defn watch-game! [$canvas !game]
   (add-watch !game ::renderer
             (fn [_ _ old-game new-game]
               (render-current-piece! $canvas old-game new-game)
-              (render-placed-cells! $canvas old-game new-game))))
+              (render-placed-cells! $canvas old-game new-game)
+              (render-cleared-rows! $canvas new-game))))
 
 (def keycode->command
   {kc/SPACE :piece-down
