@@ -4,7 +4,8 @@
             [clojurex-demo.cljs.cells :as c]
             [clojurex-demo.cljs.grid :refer [render-grid!]]
             [clojurex-demo.cljs.tetraminos :as t]
-            [cljs.core.async :as a])
+            [cljs.core.async :as a]
+            [goog.events.KeyCodes :as kc])
   (:require-macros [dommy.macros :refer [node sel1]]
                    [cljs.core.async.macros :refer [go go-loop]]))
 
@@ -27,8 +28,20 @@
             (fn [_ _ old-game new-game]
               (render-current-piece! $canvas old-game new-game))))
 
+(def keycode->command
+  {kc/SPACE :piece-down
+   kc/LEFT :piece-left
+   kc/RIGHT :piece-right
+   kc/UP :rotate-piece-clockwise
+   kc/DOWN :rotate-piece-anti-clockwise
+   kc/N :new-game})
+
 (defn listen-for-keypresses! [$canvas command-ch]
-  )
+  (d/listen! $canvas :keydown
+             (fn [e]
+               (when-let [command (keycode->command (.-keyCode e))]
+                 (a/put! command-ch command)
+                 (.preventDefault e)))))
 
 (defn make-board-widget [!game command-ch]
   (def !test-game !game)
@@ -39,10 +52,3 @@
     (watch-game! !game)
     (listen-for-keypresses! command-ch)))
 
-(comment
-  (reset! !test-game
-          (let [{:keys [blocks-wide blocks-tall]} b/canvas-size]
-            {:current-piece {:shape (rand-nth (vec t/shapes))
-                             :color (rand-nth (vec t/colors))
-                             :rotation (rand-int 4)
-                             :location (map rand-int [blocks-wide blocks-tall])}})))
