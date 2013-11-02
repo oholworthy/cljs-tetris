@@ -38,12 +38,36 @@
               x (range blocks-wide)]
         (c/color-cell! $canvas [x y] "#ccc")))))
 
+(defn bind-cell-flashing [$canvas cells-ch]
+  (go-loop [cells []
+            colour "red"]
+    (let [[v c] (a/alts! [(a/timeout 600) cells-ch])]
+      ;; not v if timeout, v if new cells list
+      (if v
+        (do
+          (c/color-cells! $canvas cells "white")
+          (recur v colour))
+        (do
+          (c/color-cells! $canvas cells colour)
+          (recur cells ({"white" "red" "red" "white"} colour)))))))
+
 (defn watch-game! [$canvas !game]
-  (add-watch !game ::renderer
-            (fn [_ _ old-game new-game]
-              (render-current-piece! $canvas old-game new-game)
-              (render-placed-cells! $canvas old-game new-game)
-              (render-cleared-rows! $canvas new-game))))
+  (let [flashing-cells-ch (a/chan)]
+    (bind-cell-flashing $canvas flashing-cells-ch)
+    
+    (add-watch !game ::renderer
+               (fn [_ _ old-game new-game]
+               
+                 (when (and (:game-over? new-game) (not (:game-over? old-game)))
+                   (a/put! flashing-cells-ch (map :cell (:placed-cells new-game))))
+
+                 (when (and (:game-over? old-game) (not (:game-over? new-game)))
+                   (a/put! flashing-cells-ch []))
+               
+                 (when-not (:game-over? new-game)
+                   (render-current-piece! $canvas old-game new-game)
+                   (render-placed-cells! $canvas old-game new-game)
+                   (render-cleared-rows! $canvas new-game))))))
 
 (def keycode->command
   {kc/SPACE :piece-down
