@@ -4,6 +4,7 @@
             [clojurex-demo.cljs.grid :refer [render-grid!]]
             [clojurex-demo.cljs.board-widget :refer [make-board-widget]]
             [clojurex-demo.cljs.cleared-rows-widget :refer [make-cleared-rows-widget]]
+            [clojurex-demo.cljs.multiplayer :refer [make-multiplayer-section]]
             [clojurex-demo.cljs.game-state :refer [wire-up-state!]]
             [cljs.core.async :as a])
   (:require-macros [dommy.macros :refer [node sel1]]
@@ -35,6 +36,7 @@
                                               (make-board-widget !game command-ch)
                                               (make-cleared-rows-widget !game)]
                                              [:div.col-md-4
-                                              (render-keys)]]))
+                                              (render-keys)
+                                              (make-multiplayer-section !game)]]))
 
                  (wire-up-state! !game command-ch)))))
