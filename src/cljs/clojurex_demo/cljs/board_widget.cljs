@@ -107,6 +107,11 @@
                  (a/put! command-ch command)
                  (.preventDefault e)))))
 
+(defn focus-later [$canvas]
+  (go
+   (a/<! (a/timeout 200))
+   (.focus $canvas)))
+
 (defn make-board-widget [!game command-ch]
   (def !test-game !game)
   (def test-command-ch command-ch)
@@ -114,5 +119,5 @@
   (doto (canvas-node)
     (render-grid!)
     (watch-game! !game)
-    (listen-for-keypresses! command-ch)))
-
+    (listen-for-keypresses! command-ch)
+    (focus-later)))
