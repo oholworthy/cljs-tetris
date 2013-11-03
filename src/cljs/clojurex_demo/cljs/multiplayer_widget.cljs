@@ -1,6 +1,7 @@
 (ns clojurex-demo.cljs.multiplayer-widget
   (:require [dommy.core :as d]
-            [clojure.string :as s])
+            [clojure.string :as s]
+            [cljs.core.async :as a])
   (:require-macros [dommy.macros :refer [node sel1]]))
 
 (defn player-name-form-node [bind-join!]
@@ -52,7 +53,8 @@
                (fn [_]
                  (let [name (d/value $name)]
                    (when-not (s/blank? name)
-                     (js/console.log name "joining.")))))))
+                     (d/set-attr! $join-button :disabled true)
+                     (a/put! commands-ch {:name name})))))))
 
 (defn make-multiplayer-widget [!top-scores !player-name commands-ch]
   (def !test-top-scores !top-scores)
