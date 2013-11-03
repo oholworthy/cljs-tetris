@@ -17,25 +17,20 @@
         (doto (node [:button.btn.btn-primary {:style {:margin-left "1em"}} "Join"])
           (bind-join! $name))]]])))
 
-(def sample-top-scores
-  [{:player "Bob" :score 14}
-   {:player "Steve" :score 8}
-   {:player "Chris" :score 5}
-   {:player "Tim" :score 2}])
-
 (defn top-scores-node [top-scores]
-  (node
-   [:div
-    [:table.table.table-striped.table-hover.table-condensed
-     [:thead
-      [:th "Player"] [:th {:style {:text-align :right}} "Score"]]
-     [:tbody
-      (for [{:keys [player score]} top-scores]
-        (node
-         [:tr
-          [:td player] [:td {:style {:text-align :right}} score]]))]]]))
+  (when (seq top-scores)
+    (node
+     [:div
+      [:table.table.table-striped.table-hover.table-condensed
+       [:thead
+        [:th "Player"] [:th {:style {:text-align :right}} "Score"]]
+       [:tbody
+        (for [{:keys [player score]} top-scores]
+          (node
+           [:tr
+            [:td player] [:td {:style {:text-align :right}} score]]))]]])))
 
-(defn multiplayer-node [bind-join!]
+(defn multiplayer-node [bind-join! bind-top-scores!]
   (node
    [:div {:style {:padding "1em"
                   :margin-top "1em"
@@ -44,8 +39,8 @@
     [:h4 "Multiplayer:"]
     [:div {:style {:margin "1em"}}
      (player-name-form-node bind-join!)]
-    [:div {:style {:margin "1em"}}
-     (top-scores-node sample-top-scores)]]))
+    (doto (node [:div {:style {:margin "1em"}}])
+      (bind-top-scores!))]))
 
 (defn join-binder [commands-ch]
   (fn bind-join! [$join-button $name]
@@ -56,9 +51,21 @@
                      (d/set-attr! $join-button :disabled true)
                      (a/put! commands-ch {:name name})))))))
 
+(defn top-score-binder [!top-scores]
+  (fn bind-top-scores! [$el]
+    (add-watch !top-scores ::binder
+               (fn [_ _ _ scores]
+                 (d/replace-contents! $el (top-scores-node scores))))))
+
 (defn make-multiplayer-widget [!top-scores !player-name commands-ch]
   (def !test-top-scores !top-scores)
   (def !test-player-name !player-name)
   (def test-commands-ch commands-ch)
 
-  (multiplayer-node (join-binder commands-ch)))
+  (multiplayer-node (join-binder commands-ch) (top-score-binder !top-scores)))
+
+(comment
+  (reset! !test-top-scores [{:player "Bob" :score 14}
+                            {:player "Steve" :score 8}
+                            {:player "Chris" :score 5}
+                            {:player "Tim" :score 2}]))
