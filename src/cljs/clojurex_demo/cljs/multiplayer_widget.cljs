@@ -30,15 +30,16 @@
            [:tr
             [:td player] [:td {:style {:text-align :right}} score]]))]]])))
 
-(defn multiplayer-node [bind-join! bind-top-scores!]
+(defn multiplayer-node [bind-form! bind-join! bind-top-scores!]
   (node
    [:div {:style {:padding "1em"
                   :margin-top "1em"
                   :border "1px solid black"
                   :border-radius "1em"}}
     [:h4 "Multiplayer:"]
-    [:div {:style {:margin "1em"}}
-     (player-name-form-node bind-join!)]
+    (doto (node [:div {:style {:margin "1em"}}
+                 (player-name-form-node bind-join!)])
+      (bind-form!))
     (doto (node [:div {:style {:margin "1em"}}])
       (bind-top-scores!))]))
 
@@ -57,15 +58,28 @@
                (fn [_ _ _ scores]
                  (d/replace-contents! $el (top-scores-node scores))))))
 
+(defn form-binder [!player-name]
+  (fn [$el]
+    (letfn [(set-form-visibility! [name]
+              (if-not (nil? name)
+                (d/hide! $el)
+                (d/show! $el)))]
+      (add-watch !player-name ::form-visibility
+                 (fn [_ _ _ name]
+                   (set-form-visibility! name)))
+      (set-form-visibility! @!player-name))))
+
 (defn make-multiplayer-widget [!top-scores !player-name commands-ch]
   (def !test-top-scores !top-scores)
   (def !test-player-name !player-name)
   (def test-commands-ch commands-ch)
 
-  (multiplayer-node (join-binder commands-ch) (top-score-binder !top-scores)))
+  (multiplayer-node (form-binder !player-name) (join-binder commands-ch) (top-score-binder !top-scores)))
 
 (comment
   (reset! !test-top-scores [{:player "Bob" :score 14}
                             {:player "Steve" :score 8}
                             {:player "Chris" :score 5}
-                            {:player "Tim" :score 2}]))
+                            {:player "Tim" :score 2}])
+  
+  (reset! !test-player-name "James"))
