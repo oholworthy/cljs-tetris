@@ -51,13 +51,33 @@
           (c/color-cells! $canvas cells colour)
           (recur cells ({"white" "red" "red" "white"} colour)))))))
 
+(defn color-all! [$canvas color]
+  (let [{:keys [blocks-wide blocks-tall]} b/canvas-size]
+    (doseq [x (range blocks-wide)
+            y (range blocks-tall)]
+      (c/color-cell! $canvas [x y] color))))
+
+(defn render-paused! [$canvas {old-paused? :paused?} {new-paused? :paused?
+                                                      :keys [placed-cells current-piece]}]
+  (when (and (not old-paused?)
+             new-paused?)
+    (color-all! $canvas "#888"))
+
+  (when (and old-paused?
+             (not new-paused?))
+    (color-all! $canvas "white")
+    (doseq [{:keys [cell color]} placed-cells]
+      (c/color-cell! $canvas cell color))
+
+    (when current-piece
+      (t/render-tetramino! $canvas current-piece))))
+
 (defn watch-game! [$canvas !game]
   (let [flashing-cells-ch (a/chan)]
     (bind-cell-flashing $canvas flashing-cells-ch)
     
     (add-watch !game ::renderer
                (fn [_ _ old-game new-game]
-               
                  (when (and (:game-over? new-game) (not (:game-over? old-game)))
                    (a/put! flashing-cells-ch (map :cell (:placed-cells new-game))))
 
@@ -67,7 +87,9 @@
                  (when-not (:game-over? new-game)
                    (render-current-piece! $canvas old-game new-game)
                    (render-placed-cells! $canvas old-game new-game)
-                   (render-cleared-rows! $canvas new-game))))))
+                   (render-cleared-rows! $canvas new-game))
+
+                 (render-paused! $canvas old-game new-game)))))
 
 (def keycode->command
   {kc/SPACE :piece-down
@@ -75,7 +97,8 @@
    kc/RIGHT :piece-right
    kc/UP :rotate-piece-clockwise
    kc/DOWN :rotate-piece-anti-clockwise
-   kc/N :new-game})
+   kc/N :new-game
+   kc/P :toggle-pause})
 
 (defn listen-for-keypresses! [$canvas command-ch]
   (d/listen! $canvas :keydown
