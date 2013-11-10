@@ -4,6 +4,7 @@
             [clojurex-demo.cljs.cells :as c]
             [clojurex-demo.cljs.grid :refer [render-grid!]]
             [clojurex-demo.cljs.tetraminos :as t]
+            [clojurex-demo.cljs.leap :as leap]
             [cljs.core.async :as a]
             [goog.events.KeyCodes :as kc])
   (:require-macros [dommy.macros :refer [node sel1]]
@@ -75,7 +76,7 @@
 (defn watch-game! [$canvas !game]
   (let [flashing-cells-ch (a/chan)]
     (bind-cell-flashing $canvas flashing-cells-ch)
-    
+
     (add-watch !game ::renderer
                (fn [_ _ old-game new-game]
                  (when (and (:game-over? new-game) (not (:game-over? old-game)))
@@ -83,7 +84,7 @@
 
                  (when (and (:game-over? old-game) (not (:game-over? new-game)))
                    (a/put! flashing-cells-ch []))
-               
+
                  (when-not (:game-over? new-game)
                    (render-current-piece! $canvas old-game new-game)
                    (render-placed-cells! $canvas old-game new-game)
@@ -115,9 +116,10 @@
 (defn make-board-widget [!game command-ch]
   (def !test-game !game)
   (def test-command-ch command-ch)
-  
+
   (doto (canvas-node)
     (render-grid!)
     (watch-game! !game)
     (listen-for-keypresses! command-ch)
+    (leap/start command-ch)
     (focus-later)))

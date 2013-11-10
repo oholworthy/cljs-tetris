@@ -9,12 +9,12 @@
 (defn- bind-hash [!hash]
   (letfn [(on-hash-change []
             (reset! !hash (.-hash js/location)))]
-    
+
     (set! (.-onhashchange js/window) on-hash-change)
-    
+
     (when (s/blank? (.-hash js/location))
       (set! (.-hash js/location) default-hash))
-    
+
     (on-hash-change)))
 
 (set! (.-onload js/window)

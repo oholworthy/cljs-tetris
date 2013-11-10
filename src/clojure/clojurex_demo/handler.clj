@@ -14,7 +14,7 @@
     (include-js "//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js")
     (include-js "//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js")
     (include-css "//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css")
-
+    (include-js "//js.leapmotion.com/0.2.1/leap.js")
     (include-js "/js/clojurex-demo.js")]
    [:body
     [:div.container

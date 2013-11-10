@@ -38,5 +38,4 @@
                                              [:div.col-md-4
                                               (render-keys)
                                               (make-multiplayer-section !game)]]))
-
                  (wire-up-state! !game command-ch)))))
